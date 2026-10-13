@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Run Flask app",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "flask",
+      "env": { "FLASK_APP": "app.main:create_app", "FLASK_DEBUG": "1" },
+      "args": ["run", "--no-debugger"],
+      "jinja": true
+    },
+    { "name": "Train model locally", "type": "debugpy", "request": "launch", "program": "train.py" }
+  ]
+}

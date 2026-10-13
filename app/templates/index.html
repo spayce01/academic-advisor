@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Academic Advisor</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:640px;margin:2rem auto;padding:0 1rem;color:#1b2430;background:#f6f8fa}
+  h1{margin-bottom:.2rem} .sub{color:#57606a;margin-top:0}
+  form{background:#fff;padding:1.2rem;border-radius:10px;border:1px solid #d0d7de}
+  label{display:block;margin:.7rem 0 .2rem;font-weight:600;font-size:.9rem}
+  input{width:100%;padding:.5rem;border:1px solid #d0d7de;border-radius:6px;box-sizing:border-box}
+  button{margin-top:1rem;padding:.65rem 1.2rem;background:#0b5fff;color:#fff;border:0;border-radius:6px;font-size:1rem;cursor:pointer}
+  #result{margin-top:1.2rem;background:#fff;padding:1.2rem;border-radius:10px;border:1px solid #d0d7de;display:none}
+  .badge{display:inline-block;padding:.25rem .7rem;border-radius:999px;color:#fff;font-weight:700}
+  .At\ Risk{background:#cf222e}.Needs\ Support{background:#bf8700}.On\ Track{background:#1a7f37}.Excellent{background:#0b5fff}
+  .err{color:#cf222e}
+</style>
+</head>
+<body>
+<h1>Academic Advisor</h1>
+<p class="sub">Enter your academic details to get a personalised advising report.</p>
+<form id="f">
+  {% for name, (label, step) in fields.items() %}
+  <label for="{{ name }}">{{ label }}</label>
+  <input id="{{ name }}" name="{{ name }}" type="number" step="{{ step }}" required>
+  {% endfor %}
+  <button type="submit">Get advice</button>
+</form>
+<div id="result"></div>
+<script>
+document.getElementById('f').addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  const box = document.getElementById('result');
+  box.style.display = 'block';
+  const r = await fetch('/api/advise', {method:'POST',
+    headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+  const j = await r.json();
+  if (!r.ok) { box.innerHTML = '<p class="err">'+j.error+'</p>'; return; }
+  box.innerHTML = '<span class="badge '+j.standing+'">'+j.standing+'</span> '
+    + '<small>confidence '+Math.round(j.confidence*100)+'%</small>'
+    + '<p>'+j.message+'</p><h3>Recommendations</h3><ul>'
+    + j.advice.map(a=>'<li>'+a+'</li>').join('')+'</ul>';
+});
+</script>
+</body>
+</html>
